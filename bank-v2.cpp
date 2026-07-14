@@ -128,7 +128,7 @@ sClient readNewClient() {
     return Client;
 }
 
-vector <sClient> loadCleintsDataFromFile(string fileName) {
+vector <sClient> loadClientsDataFromFile(string fileName) {
     vector <sClient> vClients;
     fstream myFile;
     myFile.open(fileName, ios::in);//read Mode
@@ -162,13 +162,13 @@ void printClientRecordBalanceLine(sClient client) {
 }
 
 void showAllClientsScreen() {
-    vector <sClient> vClients = loadCleintsDataFromFile(clientsFileName);
+    vector <sClient> vClients = loadClientsDataFromFile(clientsFileName);
 
     cout << "\n\t\t\t\t\tClient List (" << vClients.size() << ") Client(s).";
     cout << "\n_______________________________________________________";
     cout << "_________________________________________\n" << endl;
 
-    cout << "| " << left << setw(15) << "Accout Number";
+    cout << "| " << left << setw(15) << "Account Number";
     cout << "| " << left << setw(10) << "Pin Code";
     cout << "| " << left << setw(40) << "Client Name";
     cout << "| " << left << setw(12) << "Phone";
@@ -192,7 +192,7 @@ void showAllClientsScreen() {
 }
 
 void showTotalBalances() {
-    vector <sClient> vClients = loadCleintsDataFromFile(clientsFileName);
+    vector <sClient> vClients = loadClientsDataFromFile(clientsFileName);
 
     cout << "\n\t\t\t\t\tBalances List (" << vClients.size() << ") Client(s).";
     cout << "\n_______________________________________________________";
@@ -344,7 +344,7 @@ bool deleteClientByAccountNumber(string AccountNumber, vector <sClient>& vClient
             saveCleintsDataToFile(clientsFileName, vClients);
 
             //Refresh Clients 
-            vClients = loadCleintsDataFromFile(clientsFileName);
+            vClients = loadClientsDataFromFile(clientsFileName);
 
             cout << "\n\nClient Deleted Successfully.";
             return true;
@@ -421,7 +421,7 @@ void showDeleteClientScreen() {
     cout << "\tDelete Client Screen";
     cout << "\n-----------------------------------\n";
 
-    vector <sClient> vClients = loadCleintsDataFromFile(clientsFileName);
+    vector <sClient> vClients = loadClientsDataFromFile(clientsFileName);
     string AccountNumber = readClientAccountNumber();
     deleteClientByAccountNumber(AccountNumber, vClients);
 }
@@ -431,7 +431,7 @@ void showUpdateClientScreen() {
     cout << "\tUpdate Client Info Screen";
     cout << "\n-----------------------------------\n";
 
-    vector <sClient> vClients = loadCleintsDataFromFile(clientsFileName);
+    vector <sClient> vClients = loadClientsDataFromFile(clientsFileName);
     string AccountNumber = readClientAccountNumber();
     updateClientByAccountNumber(AccountNumber, vClients);
 }
@@ -449,7 +449,7 @@ void showFindClientScreen() {
     cout << "\tFind Client Screen";
     cout << "\n-----------------------------------\n";
 
-    vector <sClient> vClients = loadCleintsDataFromFile(clientsFileName);
+    vector <sClient> vClients = loadClientsDataFromFile(clientsFileName);
     sClient Client;
     string AccountNumber = readClientAccountNumber();
     if (findClientByAccountNumber(AccountNumber, vClients, Client))
@@ -471,7 +471,7 @@ void showDepositScreen() {
 
     sClient client;
 
-    vector <sClient> vClients = loadCleintsDataFromFile(clientsFileName);
+    vector <sClient> vClients = loadClientsDataFromFile(clientsFileName);
     string accountNumber = readClientAccountNumber();
 
     while (!findClientByAccountNumber(accountNumber, vClients, client)) {
@@ -495,7 +495,7 @@ void showWithdrawScreen() {
 
     sClient client;
 
-    vector <sClient> vClients = loadCleintsDataFromFile(clientsFileName);
+    vector <sClient> vClients = loadClientsDataFromFile(clientsFileName);
     string accountNumber = readClientAccountNumber();
 
     while (!findClientByAccountNumber(accountNumber, vClients, client)) {
