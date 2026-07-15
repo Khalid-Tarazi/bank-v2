@@ -5,18 +5,19 @@
 #include <iomanip>
 
 using namespace std;
-const string clientsFileName = "Clients.txt";
 
-void showMainMenu();
-void showTransactionsMenu();
+struct stUser {
+    string userName;
+    string password;
+    int permissions;
+    bool markForDelete = false;
+};
 
-struct sClient {
-    string AccountNumber;
-    string PinCode;
-    string Name;
-    string Phone;
-    double AccountBalance;
-    bool MarkForDelete = false;
+enum enTransactionsMenuOptions {eDeposit = 1, eWithDraw = 2, eTotalBalance = 3, eShowMainMenu = 4};
+
+enum enManageUsersMenuOptions {
+    eListUsers = 1, eAddNewUser = 2, eDeleteUser = 3,
+    eUpdateUser = 4, eFindUser = 5, eMainMenu = 6
 };
 
 enum enMainMenuOptions {
@@ -25,8 +26,29 @@ enum enMainMenuOptions {
     eFindClient = 5, eTransactions = 6, eManageUsers = 7, eLogout
 };
 
-enum enTransactionsMenuOptions {
-    eDeposit = 1, eWithDraw = 2, eTotalBalances = 3, eMainMenu = 4
+enum enMainMenuPermissions {
+    eAll = -1, pListClients = 1, pAddNewClient = 2, pDeleteClient = 4,
+    pUpdateClients = 8, pFindClient = 16, pTransactions = 32, pManageUsers = 64
+};
+
+const string clientsFileName = "Clients.txt";
+const string UsersFileName = "Users.txt";
+
+stUser currentUser;
+
+void showMainMenu();
+void showTransactionsMenu();
+void showManageUsersMenu();
+bool checkAccessPermission(enMainMenuPermissions Permission);
+void login();
+
+struct sClient {
+    string AccountNumber;
+    string PinCode;
+    string Name;
+    string Phone;
+    double AccountBalance;
+    bool MarkForDelete = false;
 };
 
 vector<string> splitString(string S1, string Delim) {
@@ -552,6 +574,37 @@ short readTransactionsMenuOption() {
     return Choice;
 }
 
+short readManageUsersOption() {
+    cout << "Choose what do you want to do? [1 to 6]? ";
+    short Choice = 0;
+    cin >> Choice;
+
+    return Choice;
+}
+
+void showManageUsersMenu() {
+    
+    if (!checkAccessPermission(enMainMenuPermissions::pManageUsers)) {
+        showAccessDeniedMessage();
+        goBackToMainMenu();
+        return;
+    }
+
+    system("cls");
+    cout << "===========================================\n";
+    cout << "\t\tManage Users Menue Screen\n";
+    cout << "===========================================\n";
+    cout << "\t[1] List Users.\n";
+    cout << "\t[2] Add New User.\n";
+    cout << "\t[3] Delete User.\n";
+    cout << "\t[4] Update User.\n";
+    cout << "\t[5] Find User.\n";
+    cout << "\t[6] Main Menu.\n";
+    cout << "===========================================\n";
+
+    performManageUsersMenuOption((enManageUsersMenuOptions)readManageUsersOption());
+}
+
 void performTransactionMenuOptions(enTransactionsMenuOptions transactionsMenuOption) {
     cout << "\n-----------------------------------\n";
     cout << "\tTransactions Menu Screen";
@@ -571,13 +624,13 @@ void performTransactionMenuOptions(enTransactionsMenuOptions transactionsMenuOpt
         goBackToTransactionsMenu();
         break;
 
-    case enTransactionsMenuOptions::eTotalBalances:
+    case enTransactionsMenuOptions::eTotalBalance:
         system("cls");
         showTotalBalancesScreen();
         goBackToTransactionsMenu();
         break;
 
-    case enTransactionsMenuOptions::eMainMenu:
+    case enTransactionsMenuOptions::eShowMainMenu:
         showMainMenu();
     }
 }
@@ -628,7 +681,8 @@ void performMainMenueOption(enMainMenuOptions MainMenuOption) {
 
     case enMainMenuOptions::eLogout:
         system("cls");
-        showEndScreen();
+        //showEndScreen();
+        login();
         break;
     }
 }
@@ -663,10 +717,49 @@ void showMainMenu() {
     performMainMenueOption((enMainMenuOptions)readMainMenuOption());
 }
 
-int main() {
+bool loadUserInfo(string username, string password) {
+    if (findUserByUserNameAndPassword(username, password, currentUser)) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
 
+void login() {
+
+    bool loginFailed = false;
+
+    string username, password;
+
+    do {
+    
+        system("cls");
+
+        cout << "\n---------------------------------\n";
+        cout << "\tLogin Screen";
+        cout << "\n---------------------------------\n";
+
+        if (loginFailed) {
+            cout << "Invalid Username/Password!\n";
+        }
+
+        cout << "Enter username: ";
+        cin >> username;
+
+        cout << "Enter password: ";
+        cin >> password;
+
+        loginFailed = !loadUserInfo(username, password);
+    
+    } while (loginFailed);
 
     showMainMenu();
+}
+
+int main() {
+    
+    login();
     system("pause>0");
     return 0;
 }
