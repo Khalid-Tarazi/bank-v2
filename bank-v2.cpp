@@ -22,7 +22,7 @@ struct sClient {
 enum enMainMenuOptions {
     eListClients = 1, eAddNewClient = 2,
     eDeleteClient = 3, eUpdateClient = 4,
-    eFindClient = 5, eTransactions = 6, eExit = 7
+    eFindClient = 5, eTransactions = 6, eManageUsers = 7, eLogout
 };
 
 enum enTransactionsMenuOptions {
@@ -104,7 +104,7 @@ sClient readNewClient() {
     sClient Client;
     cout << "Enter Account Number? ";
 
-    // Usage of std::ws will extract allthe whitespace character
+    // Usage of std::ws will extract all the whitespace character
     getline(cin >> ws, Client.AccountNumber);
 
     while (clientExistsByAccountNumber(Client.AccountNumber, clientsFileName))
@@ -198,7 +198,7 @@ void showTotalBalances() {
     cout << "\n_______________________________________________________";
     cout << "_________________________________________\n" << endl;
 
-    cout << "| " << left << setw(15) << "Accout Number";
+    cout << "| " << left << setw(15) << "Account Number";
     cout << "| " << left << setw(40) << "Client Name";
     cout << "| " << left << setw(12) << "Balance";
     cout << "\n_______________________________________________________";
@@ -279,7 +279,7 @@ bool markClientForDeleteByAccountNumber(string accountNumber, vector <sClient>& 
     return false;
 }
 
-vector <sClient> saveCleintsDataToFile(string fileName, vector <sClient> vClients) {
+vector <sClient> saveClientsDataToFile(string fileName, vector <sClient> vClients) {
     fstream myFile;
     myFile.open(fileName, ios::out);//overwrite
 
@@ -341,7 +341,7 @@ bool deleteClientByAccountNumber(string AccountNumber, vector <sClient>& vClient
         cin >> Answer;
         if (Answer == 'y' || Answer == 'Y') {
             markClientForDeleteByAccountNumber(AccountNumber, vClients);
-            saveCleintsDataToFile(clientsFileName, vClients);
+            saveClientsDataToFile(clientsFileName, vClients);
 
             //Refresh Clients 
             vClients = loadClientsDataFromFile(clientsFileName);
@@ -374,7 +374,7 @@ bool updateClientByAccountNumber(string AccountNumber, vector <sClient>& vClient
                 }
             }
 
-            saveCleintsDataToFile(clientsFileName, vClients);
+            saveClientsDataToFile(clientsFileName, vClients);
 
             cout << "\n\nClient Updated Successfully.";
             return true;
@@ -397,7 +397,7 @@ bool depositBalanceToClientByAccountNumber(string accountNumber, double amount, 
         for (sClient& c : vClients) {
             if (c.AccountNumber == accountNumber) {
                 c.AccountBalance += amount;
-                saveCleintsDataToFile(clientsFileName, vClients);
+                saveClientsDataToFile(clientsFileName, vClients);
                 cout << "\n\nDone Succcesfully, new balance is: " << c.AccountBalance;
 
                 return true;
@@ -621,7 +621,12 @@ void performMainMenueOption(enMainMenuOptions MainMenuOption) {
         showTransactionsMenu();
         break;
 
-    case enMainMenuOptions::eExit:
+    case enMainMenuOptions::eManageUsers:
+        system("cls");
+        showManageUsersMenu();
+        break;
+
+    case enMainMenuOptions::eLogout:
         system("cls");
         showEndScreen();
         break;
@@ -652,12 +657,15 @@ void showMainMenu() {
     cout << "\t[4] Update Client Info.\n";
     cout << "\t[5] Find Client.\n";
     cout << "\t[6] Transactions.\n";
-    cout << "\t[7] Exit.\n";
+    cout << "\t[7] Manage Users.\n";
+    cout << "\t[8] Logout.\n";
     cout << "===========================================\n";
     performMainMenueOption((enMainMenuOptions)readMainMenuOption());
 }
 
 int main() {
+
+
     showMainMenu();
     system("pause>0");
     return 0;
