@@ -6,6 +6,10 @@
 
 using namespace std;
 
+// function prototypes here
+void goBackToMainMenu();
+void goBackToManageUsersMenu();
+
 struct stUser {
     string userName;
     string password;
@@ -102,6 +106,7 @@ sClient convertLinetoRecord(string Line, string seperator = "#//#") {
 string convertRecordToLine(sClient Client, string seperator = "#//#") {
 
     string stClientRecord = "";
+
     stClientRecord += Client.AccountNumber + seperator;
     stClientRecord += Client.PinCode + seperator;
     stClientRecord += Client.Name + seperator;
@@ -331,7 +336,19 @@ void printClientRecordBalanceLine(sClient client) {
     cout << "| " << setw(12) << left << client.AccountBalance;
 }
 
+void showAccessDeniedMessage() {
+    cout << "\n------------------------------------\n";
+    cout << "Access Denied, \nYou dont Have Permission To Do this,\nPlease Contact Your Admin.";
+    cout << "\n------------------------------------\n";
+}
+
 void showAllClientsScreen() {
+    
+    if (!checkAccessPermission(enMainMenuPermissions::pListClients)) {
+        showAccessDeniedMessage();
+        return;
+    }
+    
     vector <sClient> vClients = loadClientsDataFromFile(clientsFileName);
 
     cout << "\n\t\t\t\t\tClient List (" << vClients.size() << ") Client(s).";
@@ -453,8 +470,17 @@ bool findClientByAccountNumber(string accountNumber, vector <sClient> vClients, 
     return false;
 }
 
-bool findUserByUserName(string username, vector <stUser> vUsers, stUser& user) {
+bool findUserByUsername(string username, vector <stUser> vUsers, stUser& user) {
 
+    for (stUser U : vUsers) {
+
+        if (U.userName == username) {
+            user = U;
+            return true;
+        }
+
+    }
+    return false;
 }
 
 bool findUserByUserNameAndPassword(string username, string password, stUser& user) {
@@ -487,6 +513,19 @@ sClient changeClientRecord(string accountNumber) {
     cout << "Enter AccountBalance? ";
     cin >> client.AccountBalance;
     return client;
+}
+
+stUser changeUserRecord(string username) {
+    stUser User;
+
+    User.userName = username;
+
+    cout << "\n\nEnter Password? ";
+    getline(cin >> ws, User.password);
+
+    User.permissions = readPermissionsToSet();
+
+    return User;
 }
 
 bool markClientForDeleteByAccountNumber(string accountNumber, vector <sClient>& vClients) {
@@ -637,7 +676,7 @@ bool deleteUserByUserName(string username, vector<stUser>& vUsers) {
     stUser user;
     char answer = 'n';
 
-    if (findUserByUserName(username, vUsers, user)) {
+    if (findUserByUsername(username, vUsers, user)) {
         printUserCard(user);
 
         cout << "\n\nAre you sure you want delete this User? y/n ? ";
@@ -686,6 +725,37 @@ bool updateClientByAccountNumber(string AccountNumber, vector <sClient>& vClient
     }
     else {
         cout << "\nClient with Account Number (" << AccountNumber << ") is Not Found!";
+        return false;
+    }
+}
+
+bool updateUserByUsername(string username, vector <stUser>& vUsers) {
+
+    stUser User;
+    char Answer = 'n';
+
+    if (findUserByUsername(username, vUsers, User)) {
+
+        printUserCard(User);
+        cout << "\n\nAre you sure you want update this User? y/n ? ";
+        cin >> Answer;
+        if (Answer == 'y' || Answer == 'Y') {
+
+            for (stUser& U : vUsers) {
+                if (U.userName == username) {
+                    U = changeUserRecord(username);
+                    break;
+                }
+            }
+
+            saveUsersDataToFile(UsersFileName, vUsers);
+
+            cout << "\n\nUser Updated Successfully.";
+            return true;
+        }
+    }
+    else {
+        cout << "\nUser with Account Number (" << username << ") is Not Found!";
         return false;
     }
 }
@@ -751,7 +821,24 @@ void showDeleteUserScreen() {
     deleteUserByUserName(username, vUsers);
 }
 
+void showUpdateUserScreen() {
+    cout << "\n-----------------------------------\n";
+    cout << "\tUpdate Users Screen";
+    cout << "\n-----------------------------------\n";
+
+    vector <stUser> vUsers = loadUsersDataFromFile(UsersFileName);
+    string Username = readUserName();
+
+    updateUserByUsername(Username, vUsers);
+}
+
 void showDeleteClientScreen() {
+
+    if (!checkAccessPermission(enMainMenuPermissions::pDeleteClient)) {
+        showAccessDeniedMessage();
+        return;
+    }
+
     cout << "\n-----------------------------------\n";
     cout << "\tDelete Client Screen";
     cout << "\n-----------------------------------\n";
@@ -762,6 +849,12 @@ void showDeleteClientScreen() {
 }
 
 void showUpdateClientScreen() {
+    
+    if (!checkAccessPermission(enMainMenuPermissions::pUpdateClients)) {
+        showAccessDeniedMessage();
+        return;
+    }
+
     cout << "\n-----------------------------------\n";
     cout << "\tUpdate Client Info Screen";
     cout << "\n-----------------------------------\n";
@@ -772,6 +865,13 @@ void showUpdateClientScreen() {
 }
 
 void showAddNewClientsScreen() {
+    
+    if (!checkAccessPermission(enMainMenuPermissions::pUpdateClients)) {
+        showAccessDeniedMessage();
+        goBackToMainMenu();
+        return;
+    }
+    
     cout << "\n-----------------------------------\n";
     cout << "\tAdd New Clients Screen";
     cout << "\n-----------------------------------\n";
@@ -780,6 +880,13 @@ void showAddNewClientsScreen() {
 }
 
 void showFindClientScreen() {
+    
+    if (!checkAccessPermission(enMainMenuPermissions::pFindClient)) {
+        showAccessDeniedMessage();
+        goBackToMainMenu();
+        return;
+    }
+
     cout << "\n-----------------------------------\n";
     cout << "\tFind Client Screen";
     cout << "\n-----------------------------------\n";
@@ -791,6 +898,20 @@ void showFindClientScreen() {
         printClientCard(Client);
     else
         cout << "\nClient with Account Number[" << AccountNumber << "] is not found!";
+}
+
+void showFindUserScreen() {
+    cout << "\n-----------------------------------\n";
+    cout << "\tFind User Screen";
+    cout << "\n-----------------------------------\n";
+
+    vector <stUser> vUsers = loadUsersDataFromFile(UsersFileName);
+    stUser User;
+    string Username = readUserName();
+    if (findUserByUsername(Username, vUsers, User))
+        printUserCard(User);
+    else
+        cout << "\nUser with Username [" << Username << "] is not found!";
 }
 
 void showEndScreen() {
@@ -859,6 +980,20 @@ void showTotalBalancesScreen() {
     showTotalBalances();
 }
 
+bool checkAccessPermission(enMainMenuPermissions permission) {
+
+    if (currentUser.permissions == enMainMenuPermissions::eAll) {
+        return true;
+    }
+
+    if ((permission & currentUser.permissions) == permission) { //using bitwise operator.. is 1 & 49 == 1?
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 void goBackToMainMenu() {
     cout << "\n\nPress any key to go back to Main Menu...";
     system("pause>0");
@@ -924,7 +1059,7 @@ void performManageUsersMenuOption(enManageUsersMenuOptions manageUsersMenuOption
 }
 
 void goBackToManageUsersMenu() {
-    cout << "\n\nPress any key to go back to Transactions Menue...";
+    cout << "\n\nPress any key to go back to Transactions Menu...";
     system("pause>0");
     showManageUsersMenu();
 }
@@ -1051,6 +1186,14 @@ void performMainMenueOption(enMainMenuOptions MainMenuOption) {
 }
 
 void showTransactionsMenu() {
+
+    if (!checkAccessPermission(enMainMenuPermissions::pTransactions))
+    {
+        showAccessDeniedMessage();
+        goBackToMainMenu();
+        return;
+    }
+
     system("cls");
     cout << "===========================================\n";
     cout << "\tTransactions Menu Screen\n";
