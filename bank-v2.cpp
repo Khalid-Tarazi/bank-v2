@@ -34,7 +34,7 @@ enum enMainMenuPermissions {
 const string clientsFileName = "Clients.txt";
 const string UsersFileName = "Users.txt";
 
-stUser currentUser;
+stUser currentUser; // global variable
 
 void showMainMenu();
 void showTransactionsMenu();
@@ -71,6 +71,19 @@ vector<string> splitString(string S1, string Delim) {
     }
 
     return vString;
+}
+
+stUser convertUserLineToRecord(string line, string seperator = "#//#") {
+
+    stUser user;
+    vector<string> vUserData;
+
+    vUserData = splitString(line, seperator = "#//#");
+
+    user.userName = vUserData[0];
+    user.password = vUserData[1];
+    user.permissions = stoi(vUserData[2]);
+    return user;
 }
 
 sClient convertLinetoRecord(string Line, string Seperator = "#//#") {
@@ -122,6 +135,10 @@ bool clientExistsByAccountNumber(string AccountNumber, string FileName) {
     return false;
 }
 
+bool userExistsByUsername(string username, string fileName) {
+
+}
+
 sClient readNewClient() {
     sClient Client;
     cout << "Enter Account Number? ";
@@ -148,6 +165,36 @@ sClient readNewClient() {
     cin >> Client.AccountBalance;
 
     return Client;
+}
+
+int readPermissionsToSet() {
+
+}
+
+stUser readNewUser() {
+
+}
+
+vector <stUser> loadUsersDataFromFile(string fileName) {
+    
+    vector <stUser> vUsers;
+
+    fstream myFile;
+    myFile.open(fileName, ios::in); //read mode
+
+    if (myFile.is_open()) {
+        string line;
+        stUser user;
+
+        while (getline(myFile, line)) {
+            
+            user = convertUserLineToRecord(line);
+            vUsers.push_back(user);
+        }
+        myFile.close();
+    }
+
+    return vUsers;
 }
 
 vector <sClient> loadClientsDataFromFile(string fileName) {
@@ -257,6 +304,10 @@ void printClientCard(sClient client) {
     cout << "\n-----------------------------------\n";
 }
 
+void printUserCard(stUser user) {
+
+}
+
 bool findClientByAccountNumber(string accountNumber, vector <sClient> vClients, sClient& client) {
     for (sClient C : vClients) {
 
@@ -265,6 +316,23 @@ bool findClientByAccountNumber(string accountNumber, vector <sClient> vClients, 
             return true;
         }
 
+    }
+    return false;
+}
+
+bool findUserByUserName(string username, vector <stUser> vUsers, stUser& user) {
+
+}
+
+bool findUserByUserNameAndPassword(string username, string password, stUser& user) {
+
+    vector <stUser> vUsers = loadUsersDataFromFile(UsersFileName);
+
+    for (stUser U : vUsers) {
+        if (U.userName == username && U.password == password) {
+            user = U;
+            return true;
+        }
     }
     return false;
 }
@@ -559,11 +627,55 @@ void goBackToTransactionsMenu() {
 }
 
 short readMainMenuOption() {
-    cout << "Choose what do you want to do? [1 to 7]? ";
+    cout << "Choose what do you want to do? [1 to 8]? ";
     short Choice = 0;
     cin >> Choice;
 
     return Choice;
+}
+
+void performManageUsersMenuOption(enManageUsersMenuOptions manageUsersMenuOption) {
+    switch (manageUsersMenuOption) {
+    
+    case enManageUsersMenuOptions::eListUsers: {
+        system("cls");
+        showListUsersScreen();
+        goBackToManageUsersMenu();
+        break;
+    }
+    
+    case enManageUsersMenuOptions::eAddNewUser: {
+        system("cls");
+        showAddNewUserScreen();
+        goBackToManageUsersMenu();
+        break;
+    }
+
+    case enManageUsersMenuOptions::eDeleteUser: {
+        system("cls");
+        showDeleteUserScreen();
+        goBackToManageUsersMenu();
+        break;
+    }
+
+    case enManageUsersMenuOptions::eUpdateUser: {
+        system("cls");
+        showUpdateUserScreen();
+        goBackToManageUsersMenu();
+        break;
+    }
+
+    case enManageUsersMenuOptions::eFindUser: {
+        system("cls");
+        showFindUserScreen();
+        goBackToManageUsersMenu();
+        break;
+    }
+
+    case enManageUsersMenuOptions::eMainMenu: {
+        showMainMenu();
+    }
+    }
 }
 
 short readTransactionsMenuOption() {
