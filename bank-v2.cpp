@@ -137,6 +137,23 @@ bool clientExistsByAccountNumber(string AccountNumber, string FileName) {
 
 bool userExistsByUsername(string username, string fileName) {
 
+    fstream myFile;
+    myFile.open(fileName, ios::in); //read mode
+
+    if (myFile.is_open()) {
+        string line;
+        stUser user;
+
+        while (getline(myFile, line)) {
+            user = convertUserLineToRecord(line);
+            if (user.userName == username) {
+                myFile.close();
+                return true;
+            }
+        }
+        myFile.close();
+    }
+    return false;
 }
 
 sClient readNewClient() {
@@ -172,7 +189,21 @@ int readPermissionsToSet() {
 }
 
 stUser readNewUser() {
+    
+    stUser user;
 
+    getline(cin >> ws, user.userName);
+
+    while (userExistsByUsername(user.userName, UsersFileName)) {
+        cout << "\nUser with [" << user.userName << "] already exists, enter another user name. \n";
+        getline(cin >> ws, user.userName);
+    }
+
+    cout << "Enter Password? ";
+    getline(cin, user.password);
+
+    user.permissions = readPermissionsToSet();
+    return user;
 }
 
 vector <stUser> loadUsersDataFromFile(string fileName) {
@@ -224,6 +255,12 @@ void printClientRecordLine(sClient client) {
     cout << "| " << setw(12) << left << client.AccountBalance;
 }
 
+void printUserRecordLine(stUser user) {
+    cout << "| " << setw(15) << left << user.userName;
+    cout << "| " << setw(10) << left << user.password;
+    cout << "| " << setw(40) << left << user.permissions;
+}
+
 void printClientRecordBalanceLine(sClient client) {
     cout << "| " << setw(15) << left << client.AccountNumber;
     cout << "| " << setw(40) << left << client.Name;
@@ -253,6 +290,33 @@ void showAllClientsScreen() {
         {
 
             printClientRecordLine(client);
+            cout << endl;
+        }
+
+    cout << "\n_______________________________________________________";
+    cout << "_________________________________________\n" << endl;
+}
+
+void showAllUsersScreen() {
+
+    vector<stUser> vUsers = loadUsersDataFromFile(UsersFileName);
+
+    cout << "\n\t\t\t\t\tUsers List (" << vUsers.size() << ") User(s).";
+    cout << "\n_______________________________________________________";
+    cout << "_________________________________________\n" << endl;
+
+    cout << "| " << left << setw(15) << "User Name";
+    cout << "| " << left << setw(10) << "Password";
+    cout << "| " << left << setw(40) << "Permissions";
+    cout << "\n_______________________________________________________";
+    cout << "_________________________________________\n" << endl;
+
+    if (vUsers.size() == 0)
+        cout << "\t\t\t\tNo Users Available In the System!";
+    else
+
+        for (stUser User : vUsers) {
+            printUserRecordLine(User);
             cout << endl;
         }
 
@@ -406,6 +470,12 @@ void addNewClient() {
     addDataLineToFile(clientsFileName, convertRecordToLine(Client));
 }
 
+void addNewUser() {
+    stUser user;
+    user = readNewUser();
+    daderq
+}
+
 void addNewClients() {
     char AddMore = 'Y';
     do {
@@ -417,6 +487,18 @@ void addNewClients() {
         cin >> AddMore;
 
     } while (toupper(AddMore) == 'Y');
+}
+
+void addNewUsers() {
+    char addMore = 'Y';
+
+    do {
+        cout << "Adding new user:\n\n";
+
+        addNewUser();
+        cout << "User added sucessfully, do you want to add more users? Y/N? ";
+        cin >> addMore;
+    } while (toupper(addMore) == 'Y');
 }
 
 bool deleteClientByAccountNumber(string AccountNumber, vector <sClient>& vClients) {
@@ -504,6 +586,18 @@ string readClientAccountNumber() {
     cout << "\nPlease enter AccountNumber? ";
     cin >> AccountNumber;
     return AccountNumber;
+}
+
+void showListUsersScreen() {
+    showAllUsersScreen();
+}
+
+void showAddNewUserScreen() {
+    cout << "\n-----------------------------------\n";
+    cout << "\tAdd New User Screen";
+    cout << "\n-----------------------------------\n";
+
+    addNewUsers();
 }
 
 void showDeleteClientScreen() {
@@ -676,6 +770,12 @@ void performManageUsersMenuOption(enManageUsersMenuOptions manageUsersMenuOption
         showMainMenu();
     }
     }
+}
+
+void goBackToManageUsersMenu() {
+    cout << "\n\nPress any key to go back to Transactions Menue...";
+    system("pause>0");
+    showManageUsersMenu();
 }
 
 short readTransactionsMenuOption() {
